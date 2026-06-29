@@ -22,7 +22,7 @@ export default function Home() {
   const [extractedChars, setExtractedChars] = useState<number | null>(null);
 
   const fileLabel = useMemo(() => {
-    if (!file) return "PDF, DOCX, HWPX, TXT, MD 파일 업로드";
+    if (!file) return "DOCX, HWPX, TXT, MD 파일 업로드";
     return `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)}MB`;
   }, [file]);
 
@@ -34,6 +34,11 @@ export default function Home() {
 
     if (!file) {
       setError("분석할 계약서 파일을 먼저 업로드하세요.");
+      return;
+    }
+
+    if (file.name.toLowerCase().endsWith(".pdf")) {
+      setError("현재 안정 배포 버전에서는 PDF 직접 업로드를 잠시 비활성화했습니다. PDF 내용을 DOCX, TXT, MD 또는 HWPX로 변환해서 업로드하세요.");
       return;
     }
 
@@ -84,11 +89,11 @@ export default function Home() {
             <input
               id="contractFile"
               type="file"
-              accept=".pdf,.docx,.hwpx,.txt,.md"
+              accept=".docx,.hwpx,.txt,.md"
               onChange={(event) => setFile(event.target.files?.[0] || null)}
             />
             <p>{fileLabel}</p>
-            <small>HWP 파일은 PDF 또는 HWPX로 변환 후 업로드하세요. 스캔 PDF는 OCR 처리 후 업로드해야 정확합니다.</small>
+            <small>현재 안정 배포 버전은 DOCX, HWPX, TXT, MD를 우선 지원합니다. PDF는 내용을 복사해 TXT/MD로 저장하거나 DOCX로 변환해 업로드하세요.</small>
           </div>
 
           <div className="formGrid">
