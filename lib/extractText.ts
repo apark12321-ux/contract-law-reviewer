@@ -1,4 +1,7 @@
+import { createRequire } from "node:module";
 import JSZip from "jszip";
+
+const requireFromModule = createRequire(import.meta.url);
 
 function decodeXmlEntities(value: string) {
   return value
@@ -27,6 +30,8 @@ async function extractHwpxText(buffer: Buffer) {
   return chunks.join("\n");
 }
 
+type PdfParse = (data: Buffer) => Promise<{ text: string }>;
+
 export async function extractTextFromFile(file: File) {
   const name = file.name.toLowerCase();
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -42,9 +47,8 @@ export async function extractTextFromFile(file: File) {
   }
 
   if (name.endsWith(".pdf")) {
-    const pdfParseModule = await import("pdf-parse");
-    const pdfParse = pdfParseModule.default || pdfParseModule;
-    const result = await (pdfParse as unknown as (data: Buffer) => Promise<{ text: string }>)(buffer);
+    const pdfParse = requireFromModule("pdf-parse") as PdfParse;
+    const result = await pdfParse(buffer);
     return result.text;
   }
 
