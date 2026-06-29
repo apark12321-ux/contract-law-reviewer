@@ -27,38 +27,6 @@ async function extractHwpxText(buffer: Buffer) {
   return chunks.join("\n");
 }
 
-type PdfTextItem = { str?: string };
-type PdfPage = { getTextContent: () => Promise<{ items: PdfTextItem[] }> };
-type PdfDocument = {
-  numPages: number;
-  getPage: (pageNumber: number) => Promise<PdfPage>;
-  destroy?: () => Promise<void> | void;
-};
-type PdfJsModule = {
-  getDocument: (source: { data: Uint8Array; disableWorker: boolean }) => { promise: Promise<PdfDocument> };
-};
-
-async function extractPdfText(buffer: Buffer) {
-  const pdfjsPath = "pdfjs-dist/legacy/build/pdf.mjs";
-  const pdfjs = (await import(pdfjsPath)) as PdfJsModule;
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true });
-  const pdf = await loadingTask.promise;
-  const pages: string[] = [];
-
-  try {
-    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-      const page = await pdf.getPage(pageNumber);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item) => item.str || "").join(" ").trim();
-      if (pageText) pages.push(pageText);
-    }
-  } finally {
-    await pdf.destroy?.();
-  }
-
-  return pages.join("\n\n");
-}
-
 export async function extractTextFromFile(file: File) {
   const name = file.name.toLowerCase();
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -74,12 +42,12 @@ export async function extractTextFromFile(file: File) {
   }
 
   if (name.endsWith(".pdf")) {
-    return extractPdfText(buffer);
+    throw new Error("현재 Vercel 안정 배포 버전에서는 PDF 직접 추출을 잠시 비활성화했습니다. DOCX, HWPX, TXT, MD로 변환해서 업로드하세요.");
   }
 
   if (name.endsWith(".hwpx")) {
     return extractHwpxText(buffer);
   }
 
-  throw new Error("지원하지 않는 파일 형식입니다. PDF, DOCX, HWPX, TXT, MD 파일을 업로드하세요. HWP 파일은 PDF 또는 HWPX로 변환 후 업로드하세요.");
+  throw new Error("지원하지 않는 파일 형식입니다. DOCX, HWPX, TXT, MD 파일을 업로드하세요. HWP와 PDF는 DOCX 또는 TXT로 변환 후 업로드하세요.");
 }
