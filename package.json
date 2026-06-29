@@ -15,11 +15,10 @@
     "jszip": "latest",
     "mammoth": "latest",
     "next": "latest",
-    "pdf-parse": "1.1.1",
+    "pdfjs-dist": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "typescript": "latest",
-    "@types/pdf-parse": "latest"
+    "typescript": "latest"
   },
   "devDependencies": {}
 }
