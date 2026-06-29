@@ -15,7 +15,6 @@
     "jszip": "latest",
     "mammoth": "latest",
     "next": "latest",
-    "pdfjs-dist": "latest",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest"
