@@ -1,7 +1,4 @@
-import { createRequire } from "node:module";
 import JSZip from "jszip";
-
-const requireFromModule = createRequire(import.meta.url);
 
 function decodeXmlEntities(value: string) {
   return value
@@ -30,7 +27,37 @@ async function extractHwpxText(buffer: Buffer) {
   return chunks.join("\n");
 }
 
-type PdfParse = (data: Buffer) => Promise<{ text: string }>;
+type PdfTextItem = { str?: string };
+type PdfPage = { getTextContent: () => Promise<{ items: PdfTextItem[] }> };
+type PdfDocument = {
+  numPages: number;
+  getPage: (pageNumber: number) => Promise<PdfPage>;
+  destroy?: () => Promise<void> | void;
+};
+type PdfJsModule = {
+  getDocument: (source: { data: Uint8Array; disableWorker: boolean }) => { promise: Promise<PdfDocument> };
+};
+
+async function extractPdfText(buffer: Buffer) {
+  const pdfjsPath = "pdfjs-dist/legacy/build/pdf.mjs";
+  const pdfjs = (await import(pdfjsPath)) as PdfJsModule;
+  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true });
+  const pdf = await loadingTask.promise;
+  const pages: string[] = [];
+
+  try {
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item) => item.str || "").join(" ").trim();
+      if (pageText) pages.push(pageText);
+    }
+  } finally {
+    await pdf.destroy?.();
+  }
+
+  return pages.join("\n\n");
+}
 
 export async function extractTextFromFile(file: File) {
   const name = file.name.toLowerCase();
@@ -47,9 +74,7 @@ export async function extractTextFromFile(file: File) {
   }
 
   if (name.endsWith(".pdf")) {
-    const pdfParse = requireFromModule("pdf-parse") as PdfParse;
-    const result = await pdfParse(buffer);
-    return result.text;
+    return extractPdfText(buffer);
   }
 
   if (name.endsWith(".hwpx")) {
