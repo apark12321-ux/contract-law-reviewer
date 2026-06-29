@@ -1,0 +1,25 @@
+{
+  "name": "contract-law-reviewer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "jszip": "latest",
+    "mammoth": "latest",
+    "next": "latest",
+    "pdf-parse": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "@types/pdf-parse": "latest"
+  },
+  "devDependencies": {}
+}
