@@ -15,7 +15,7 @@
     "jszip": "latest",
     "mammoth": "latest",
     "next": "latest",
-    "pdf-parse": "latest",
+    "pdf-parse": "1.1.1",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest",
